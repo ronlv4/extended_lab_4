@@ -1,6 +1,7 @@
 OBJ_DIR := obj
 BIN_DIR := bin
 SRC_DIR := src
+LIST_DIR := list
 
 all: clean task1b
 
@@ -20,4 +21,4 @@ $(OBJ_DIR)/task1b.o: $(SRC_DIR)/task1b.c
 
 
 clean:
-	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/*
+	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/* $(LIST_DIR)/*

@@ -8,6 +8,15 @@
 #define SYS_WRITE 4
 #define NEW_LINE '\n'
 
+void check_free_mem()
+{
+	char* buf[500];
+	system_call(SYS_WRITE, STDERR, itoa(1),1);
+	system_call(0x5b, buf, 500);
+	system_call(SYS_WRITE, STDERR, itoa(2), 1);
+}
+
+
 void print_if_debug_mode(int debug_mode, int call_id, int arg1, int return_code)
 {
 	if (debug_mode)
@@ -29,6 +38,7 @@ void print_system_call(int call_id, int arg1, int return_code){
 	strcat(buf, itoa(return_code));
 	strcat(buf, newline);
 	system_call(SYS_WRITE, STDERR, buf, strlen(buf));
+	system_call(0x5b, buf, 100);
 }
 
 
@@ -49,8 +59,9 @@ int main(int argc, char **argv)
 		}
 		
 	}
-	
-	
+
+	system_call(SYS_WRITE, STDOUT, itoa(debug_mode), 1);
+
 	int word_count = 0;
 	char* new_line = "\n";
 	int end_space = 0;
@@ -62,6 +73,7 @@ int main(int argc, char **argv)
 		while (buf[0] == ' ' && strcmp(buf, new_line))
 		{
 			bytes_read = system_call(SYS_READ, STDIN, buf, 1);
+			
 		}
 		if (!strcmp(buf, new_line))
 		{
@@ -71,11 +83,14 @@ int main(int argc, char **argv)
 		while (buf[0] != ' ' && bytes_read != 0 && strcmp(buf, new_line))
 		{
 			bytes_read = system_call(SYS_READ, STDIN, buf, 1);
+			print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read);
+
+
 		}
 		word_count++;
 	}
 
 	return_code = system_call(SYS_WRITE, STDOUT, itoa(word_count), 1);
 	return_code = system_call(SYS_WRITE, STDOUT, new_line, strlen(new_line));
-	print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read);
+
 }
