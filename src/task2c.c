@@ -10,6 +10,22 @@
 #define SYS_CLOSE 6
 #define SYS_GETDENTS 0x8d
 
+struct linux_dirent {
+               unsigned long  d_ino;     /* Inode number */
+               unsigned long  d_off;     /* Offset to next linux_dirent */
+               unsigned short d_reclen;  /* Length of this linux_dirent */
+               char           d_name[];  /* Filename (null-terminated) */
+                                 /* length is actually (d_reclen - 2 -
+                                    offsetof(struct linux_dirent, d_name)) */
+               /*
+               char           pad;       // Zero padding byte
+               char           d_type;    // File type (only since Linux
+                                         // 2.6.4); offset is (d_reclen - 1)
+               */
+           };
+
+typedef struct linux_dirent dirnet;
+
 int system_call();
 
 
@@ -19,7 +35,6 @@ int main(int argc, char **argv)
     struct linux_dirent *d;
 
     int BUF_SIZE = 8192;
-    int debug_mode = 0;
     int arg_index = 1;
     int output_fd = STDOUT;
     char buf[BUF_SIZE];
@@ -35,11 +50,6 @@ int main(int argc, char **argv)
 			prefix = argv[arg_index] + 2;
 			arg_index++;
 		}
-        else if (*(argv[arg_index] + 1) == 'D')
-        {
-            debug_mode = 1;
-            arg_index++;
-        }
 		else
 		{
 			arg_index++;
