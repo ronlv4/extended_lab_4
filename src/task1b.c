@@ -6,7 +6,8 @@
 #define SYS_EXIT 1
 #define SYS_READ 3
 #define SYS_WRITE 4
-#define NEW_LINE '\n'
+#define SYS_OPEN 5
+#define SYS_CLOSE 6
 
 void check_free_mem()
 {
@@ -46,11 +47,27 @@ int main(int argc, char **argv)
 {
 	int arg_index = 1;
 	int debug_mode = 0;
+	char * inputFileName;
+	int inputFd = STDIN;
+	int outputFd = STDOUT;
+	char * outputFileName;
 	while (arg_index < argc)
 	{
 		if (!strcmp(argv[arg_index], "-D"))
 		{
 			debug_mode = 1;
+			arg_index++;
+		}
+		else if(argv[arg_index][1] == 'i')
+		{
+			inputFileName = argv[arg_index] + 2;
+			inputFd = system_call(SYS_OPEN, inputFileName, O_RDONLY);
+			arg_index++;
+		}
+		else if(argv[arg_index][1] == 'o')
+		{
+			outputFileName = argv[arg_index] + 2;
+			outputFd = system_call(SYS_OPEN, inputFileName, O_RDWR | O_CREAT);
 			arg_index++;
 		}
 		else
@@ -68,11 +85,11 @@ int main(int argc, char **argv)
 	char *buf[1];
 	int bytes_read = 0;
 	int return_code;
-	bytes_read = system_call(SYS_READ, STDIN, buf, 1);
+	bytes_read = system_call(SYS_READ, inputFd, buf, 1);
 	while (bytes_read != 0){
 		while (buf[0] == ' ' && strcmp(buf, new_line))
 		{
-			bytes_read = system_call(SYS_READ, STDIN, buf, 1);
+			bytes_read = system_call(SYS_READ, inputFd, buf, 1);
 			
 		}
 		if (!strcmp(buf, new_line))
@@ -83,14 +100,14 @@ int main(int argc, char **argv)
 		while (buf[0] != ' ' && bytes_read != 0 && strcmp(buf, new_line))
 		{
 			bytes_read = system_call(SYS_READ, STDIN, buf, 1);
-			print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read);
+			print_if_debug_mode(debug_mode, SYS_READ, inputFd, bytes_read);
 
 
 		}
 		word_count++;
 	}
 
-	return_code = system_call(SYS_WRITE, STDOUT, itoa(word_count), 1);
-	return_code = system_call(SYS_WRITE, STDOUT, new_line, strlen(new_line));
+	return_code = system_call(SYS_WRITE, outputFd, itoa(word_count), 1);
+	return_code = system_call(SYS_WRITE, outputFd, new_line, strlen(new_line));
 
 }
