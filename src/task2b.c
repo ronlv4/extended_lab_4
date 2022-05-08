@@ -12,10 +12,66 @@
 
 int system_call();
 
+struct linux_dirent {
+               unsigned long  d_ino;     /* Inode number */
+               unsigned long  d_off;     /* Offset to next linux_dirent */
+               unsigned short d_reclen;  /* Length of this linux_dirent */
+               char           d_name[];  /* Filename (null-terminated) */
+                                 /* length is actually (d_reclen - 2 -
+                                    offsetof(struct linux_dirent, d_name)) */
+               /*
+               char           pad;       // Zero padding byte
+               char           d_type;    // File type (only since Linux
+                                         // 2.6.4); offset is (d_reclen - 1)
+               */
+           };
+void print_if_debug_mode(int debug_mode, int sys_call, char* first_arg, int return_code)
+{
+    print_system_calls_char(sys_call, first_arg, return_code);
+
+
+}
+void print_system_calls_char(int sys_call, char* first_arg, int return_code)
+{
+    char* new_line = "\n";
+    system_call(SYS_WRITE, STDERR, "system call: ", 13);
+    system_call(SYS_WRITE, STDERR, itoa(sys_call), 1);
+    system_call(SYS_WRITE, STDERR, new_line, 1);
+    system_call(SYS_WRITE, STDERR, "first argument: ", 14);
+    system_call(SYS_WRITE, STDERR, first_arg, strlen(first_arg));
+    system_call(SYS_WRITE, STDERR, new_line, 1);
+    system_call(SYS_WRITE, STDERR, "return code: ", 13);
+    system_call(SYS_WRITE, STDERR, itoa(return_code), 13);
+    system_call(SYS_WRITE, STDERR, new_line, 1);
+
+}
+
+void print_if_debug_mode(int debug_mode, int sys_call, int first_arg, int return_code)
+{
+    if (debug_mode)
+    {
+        print_system_calls_int(sys_call, first_arg, return_code);
+    }
+}
+
+void print_system_calls_int(int sys_call, int first_arg, int return_code)
+{
+    char* new_line = "\n";
+    system_call(SYS_WRITE, STDERR, "system call: ", 13);
+    system_call(SYS_WRITE, STDERR, itoa(sys_call), 1);
+    system_call(SYS_WRITE, STDERR, new_line, 1);
+    system_call(SYS_WRITE, STDERR, "first argument: ", 14);
+    system_call(SYS_WRITE, STDERR, itoa(first_arg), 1);
+    system_call(SYS_WRITE, STDERR, new_line, 1);
+    system_call(SYS_WRITE, STDERR, "return code: ", 13);
+    system_call(SYS_WRITE, STDERR, itoa(return_code), 13);
+    system_call(SYS_WRITE, STDERR, new_line, 1);
+}
+
 
 int main(int argc, char **argv)
 {
-    int nread, fd, bpos;
+    int nread, fd, bpos, tmp_ret_code;
     struct linux_dirent *d;
 
     int BUF_SIZE = 8192;
@@ -47,15 +103,14 @@ int main(int argc, char **argv)
 		
 	}
 
-    system_call(SYS_WRITE, output_fd, prefix, strlen(prefix));
-	system_call(SYS_WRITE, output_fd, new_line, strlen(new_line));
-
-
     fd = system_call(SYS_OPEN, ".", 0 , 0);
+    print_if_debug_mode(debug_mode, SYS_OPEN, ".", fd);
     nread = system_call(SYS_GETDENTS, fd, buf, BUF_SIZE);
+    print_if_debug_mode(debug_mode, SYS_GETDENTS, fd, nread);
     if (nread == -1)
     {
-        system_call(SYS_WRITE,STDOUT, "error-getdents",BUF_SIZE);
+        tmp_ret_code = system_call(SYS_WRITE,STDOUT, "error-getdents",BUF_SIZE);
+        print_if_debug_mode(debug_mode, SYS_WRITE, "error-getdents", tmp_ret_code);
         return 1;
     }
 	system_call(SYS_WRITE, output_fd, new_line, strlen(new_line));
