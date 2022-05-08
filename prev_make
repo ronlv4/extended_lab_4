@@ -1,0 +1,28 @@
+CC		:=	gcc -m32
+CC_FLAGS	:=	-Wall -g
+ASM		:=	nasm
+ASM_FLAGS	:=	-f elf -g
+LINK		:=	ld
+
+SRC_DIR		:=	src
+OBJ_DIR		:=	obj
+LIST_DIR	:=	list
+BIN_DIR		:=	bin
+
+all: clean task1 # task2
+
+task1:	$(OBJ_DIR)/start.o $(OBJ_DIR)/task1b.o
+	$(CC) -o $(BIN_DIR)/task1b.bin $(OBJ_DIR)/task1b.o $(OBJ_DIR)/start.o
+
+task2:	$(OBJ_DIR)/main_task2Assignment1.o $(OBJ_DIR)/asm_task2Assignment1.o
+	$(CC) -o $(BIN_DIR)/main_tasl2Assignment1.bin $(OBJ_DIR)/main_task2Assignment1.o $(OBJ_DIR)/asm_task2Assignment1.o
+
+# .c/.s compile rules
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
+	$(CC) -c $(CC_FLAGS) $< -o $@
+
+$(OBJ_DIR)/%.o : $(SRC_DIR)/%.s
+	$(ASM) $(ASM_FLAGS) $< -o $@ -l $(subst .o,.lst,$(subst $(OBJ_DIR),$(LIST_DIR),$@))
+
+clean:
+	rm -rf $(BIN_DIR)/*.bin $(OBJ_DIR)/*.o $(LIST_DIR)/*.lst
