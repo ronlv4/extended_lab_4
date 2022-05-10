@@ -1,113 +1,159 @@
 #include "util.h"
 
+#include <fcntl.h>
+
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
 #define SYS_EXIT 1
 #define SYS_READ 3
 #define SYS_WRITE 4
-#define SYS_OPEN 5
-#define SYS_CLOSE 6
+#define NEW_LINE '\n'
 
 void check_free_mem()
 {
-	char* buf[500];
-	system_call(SYS_WRITE, STDERR, itoa(1),1);
+	char *buf[500];
+	system_call(SYS_WRITE, STDERR, itoa(1), 1);
 	system_call(0x5b, buf, 500);
 	system_call(SYS_WRITE, STDERR, itoa(2), 1);
 }
 
-
-void print_if_debug_mode(int debug_mode, int call_id, int arg1, int return_code)
+void print_if_debug_mode(int debug_mode, int call_id, int arg1, int return_code, int out_name)
 {
 	if (debug_mode)
 	{
-		print_system_call(call_id, arg1, return_code);
+		print_system_call(call_id, arg1, return_code, out_name);
 	}
 }
 
-void print_system_call(int call_id, int arg1, int return_code){
-	char* newline = "\n";
-	char* buf[100];
-	strcat(buf, "system call id: ");
-	strcat(buf, itoa(call_id));
-	strcat(buf, newline);
-	strcat(buf, "first argument: ");
-	strcat(buf, itoa(arg1));
-	strcat(buf, newline);
-	strcat(buf, "return code: ");
-	strcat(buf, itoa(return_code));
-	strcat(buf, newline);
-	system_call(SYS_WRITE, STDERR, buf, strlen(buf));
-	system_call(0x5b, buf, 100);
+void print_system_call(int call_id, int arg1, int return_code, int out_name)
+{
+	char *newline = "\n";
+	char *buf[100];
+	if (out_name == 0)
+	{
+		system_call(SYS_WRITE, STDOUT, "\nsystem call id: ", strlen("\nfirst argument: "));
+		system_call(SYS_WRITE, STDOUT, itoa(call_id), strlen(itoa(call_id)));
+		system_call(SYS_WRITE, STDOUT, "\nfirst argument: ", strlen("\nfirst argument: "));
+		system_call(SYS_WRITE, STDOUT, itoa(arg1), strlen(itoa(arg1)));
+		system_call(SYS_WRITE, STDOUT, "\nreturn code: ", strlen("\nreturn code: "));
+		system_call(SYS_WRITE, STDOUT, itoa(return_code), strlen(itoa(return_code)));
+		system_call(SYS_WRITE, STDOUT, "\n\n", strlen("\n\n"));
+	}
+	else
+	{
+		system_call(SYS_WRITE, out_name, "\nsystem call id: ", strlen("\nfirst argument: "));
+		system_call(SYS_WRITE, out_name, itoa(call_id), strlen(itoa(call_id)));
+		system_call(SYS_WRITE, out_name, "\nfirst argument: ", strlen("\nfirst argument: "));
+		system_call(SYS_WRITE, out_name, itoa(arg1), strlen(itoa(arg1)));
+		system_call(SYS_WRITE, out_name, "\nreturn code: ", strlen("\nreturn code: "));
+		system_call(SYS_WRITE, out_name, itoa(return_code), strlen(itoa(return_code)));
+		system_call(SYS_WRITE, out_name, "\n\n", strlen("\n\n"));
+	}
 }
-
 
 int main(int argc, char **argv)
 {
 	int arg_index = 1;
 	int debug_mode = 0;
-	char * inputFileName;
-	int inputFd = STDIN;
-	int outputFd = STDOUT;
-	char * outputFileName;
+	int outfile = 0;
+	int infile = 0;
+	char *file_in;
+	char *out_file;
+	int fp;
+	int fout = 0;
+	file_in = argv[arg_index] + 2;
 	while (arg_index < argc)
 	{
 		if (!strcmp(argv[arg_index], "-D"))
 		{
 			debug_mode = 1;
-			arg_index++;
 		}
-		else if(argv[arg_index][1] == 'i')
+		else if (!strncmp(argv[arg_index], "-i", 2))
 		{
-			inputFileName = argv[arg_index] + 2;
-			inputFd = system_call(SYS_OPEN, inputFileName, O_RDONLY);
-			arg_index++;
+			infile = 1;
+			file_in = argv[arg_index] + 2;
+			fp = system_call(5, file_in, 0, 0777);
 		}
-		else if(argv[arg_index][1] == 'o')
+		else if (!strncmp(argv[arg_index], "-o", 2))
 		{
-			outputFileName = argv[arg_index] + 2;
-			outputFd = system_call(SYS_OPEN, inputFileName, O_RDWR | O_CREAT);
-			arg_index++;
+			outfile = 1;
+			out_file = argv[arg_index] + 2;
+			fout = system_call(5, out_file, 1 | 64, 0777);
+			print_if_debug_mode(debug_mode, 5, STDOUT, 1, fout);
 		}
-		else
-		{
-			arg_index++;
-		}
-		
+		arg_index++;
 	}
-
-	system_call(SYS_WRITE, STDOUT, itoa(debug_mode), 1);
-
+	if (infile)
+	{
+		print_if_debug_mode(debug_mode, 5, STDOUT, 1, fout);
+	}
+	print_if_debug_mode(debug_mode, SYS_WRITE, STDOUT, 1, fout);
 	int word_count = 0;
-	char* new_line = "\n";
+	char *new_line = "\n";
 	int end_space = 0;
 	char *buf[1];
 	int bytes_read = 0;
 	int return_code;
-	bytes_read = system_call(SYS_READ, inputFd, buf, 1);
-	while (bytes_read != 0){
+	int out = 0;
+	int in = 0;
+	if (infile = 1)
+	{
+		bytes_read = system_call(SYS_READ, fp, buf, 1);
+		print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+	}
+	else
+	{
+		bytes_read = system_call(SYS_READ, STDIN, buf, 1);
+		print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+	}
+	while (bytes_read != 0)
+	{
 		while (buf[0] == ' ' && strcmp(buf, new_line))
 		{
-			bytes_read = system_call(SYS_READ, inputFd, buf, 1);
-			
+			if (infile = 1)
+			{
+				bytes_read = system_call(SYS_READ, fp, buf, 1);
+				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+			}
+			else
+			{
+				bytes_read = system_call(SYS_READ, STDIN, buf, 1);
+
+				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+			}
 		}
 		if (!strcmp(buf, new_line))
 		{
 			break;
 		}
-		
 		while (buf[0] != ' ' && bytes_read != 0 && strcmp(buf, new_line))
 		{
-			bytes_read = system_call(SYS_READ, STDIN, buf, 1);
-			print_if_debug_mode(debug_mode, SYS_READ, inputFd, bytes_read);
-
-
+			if (infile = 1)
+			{
+				bytes_read = system_call(SYS_READ, fp, buf, 1);
+				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+			}
+			else
+			{
+				bytes_read = system_call(SYS_READ, STDIN, buf, 1);
+				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+			}
 		}
 		word_count++;
 	}
-
-	return_code = system_call(SYS_WRITE, outputFd, itoa(word_count), 1);
-	return_code = system_call(SYS_WRITE, outputFd, new_line, strlen(new_line));
-
+	if (fout == 0)
+	{
+		return_code = system_call(SYS_WRITE, STDOUT, itoa(word_count), 1);
+		print_if_debug_mode(debug_mode, SYS_WRITE, STDOUT, return_code, fout);
+		return_code = system_call(SYS_WRITE, STDOUT, new_line, strlen(new_line));
+		print_if_debug_mode(debug_mode, SYS_WRITE, STDOUT, return_code, fout);
+	}
+	else
+	{
+		return_code = system_call(SYS_WRITE, fout, itoa(word_count), 1);
+		print_if_debug_mode(debug_mode, SYS_WRITE, fout, return_code, fout);
+		return_code = system_call(SYS_WRITE, fout, new_line, strlen(new_line));
+		print_if_debug_mode(debug_mode, SYS_WRITE, fout, return_code, fout);
+	}
 }
