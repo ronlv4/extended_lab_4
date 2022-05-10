@@ -5,6 +5,8 @@ global _start
 global system_call
 global infection
 global infector
+global code_start
+global code_end
 extern main
 _start:
     pop    dword ecx    ; ecx = argc

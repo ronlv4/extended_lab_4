@@ -27,10 +27,19 @@ struct linux_dirent {
 typedef struct linux_dirent dirnet;
 
 int system_call();
+void code_start();
+void code_end();
 
 
 int main(int argc, char **argv)
 {
+    void* start_ptr = &code_start;
+    void* end_ptr = &code_end;
+
+    system_call(SYS_WRITE, STDOUT, start_ptr, 4);
+    system_call(SYS_WRITE, STDOUT, end_ptr, 4);
+
+    system_call(SYS_EXIT, 0);
 
     int nread, fd, bpos;
     struct linux_dirent *d;
