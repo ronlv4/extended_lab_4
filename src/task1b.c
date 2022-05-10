@@ -79,14 +79,14 @@ int main(int argc, char **argv) {
     bytes_read = system_call(SYS_READ, input_fd, buf, 1);
     print_if_debug_mode_int(debug_mode, SYS_READ, input_fd, bytes_read);
     while (bytes_read != 0) {
-        while ((*buf)[0] == ' ' && strcmp(buf, new_line)) {
+        while (buf[0] == ' ' && strcmp(buf, new_line)) {
             bytes_read = system_call(SYS_READ, input_fd, buf, 1);
             print_if_debug_mode_int(debug_mode, SYS_READ, input_fd, bytes_read);
         }
         if (!strcmp(buf, new_line)) {
             break;
         }
-        while ((*buf)[0] != ' ' && bytes_read != 0 && strcmp(buf, new_line)) {
+        while (buf[0] != ' ' && bytes_read != 0 && strcmp(buf, new_line)) {
             bytes_read = system_call(SYS_READ, input_fd, buf, 1);
             print_if_debug_mode_int(debug_mode, SYS_READ, input_fd, bytes_read);
         }
