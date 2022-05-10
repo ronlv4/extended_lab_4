@@ -3,7 +3,7 @@ BIN_DIR := bin
 SRC_DIR := src
 LIST_DIR := list
 
-all: clean task1b # task2b task1b
+all: clean task1b task2b task2c
 
 task1b: $(OBJ_DIR)/start.o $(OBJ_DIR)/util.o $(OBJ_DIR)/task1b.o
 	ld -m elf_i386 $(OBJ_DIR)/start.o $(OBJ_DIR)/task1b.o $(OBJ_DIR)/util.o -o $(BIN_DIR)/task1b
