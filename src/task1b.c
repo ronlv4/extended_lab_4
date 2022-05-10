@@ -5,25 +5,13 @@
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
-#define SYS_EXIT 1
 #define SYS_READ 3
 #define SYS_WRITE 4
 
-system_call();
-
-void check_free_mem()
-{
-	char *buf[500];
-	system_call(SYS_WRITE, STDERR, itoa(1), 1);
-	system_call(0x5b, buf, 500);
-	system_call(SYS_WRITE, STDERR, itoa(2), 1);
-}
-
+int system_call();
 
 void print_system_call(int call_id, int arg1, int return_code, int out_name)
 {
-	char *newline = "\n";
-	char *buf[100];
 	if (out_name == 0)
 	{
 		system_call(SYS_WRITE, STDOUT, "\nsystem call id: ", strlen("\nfirst argument: "));
@@ -112,7 +100,7 @@ int main(int argc, char **argv)
 	{
 		while (buf[0] == ' ' && strcmp(buf, new_line))
 		{
-			if (input_fd = 1)
+			if (input_fd == 1)
 			{
 				bytes_read = system_call(SYS_READ, fp, buf, 1);
 				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
@@ -120,7 +108,6 @@ int main(int argc, char **argv)
 			else
 			{
 				bytes_read = system_call(SYS_READ, STDIN, buf, 1);
-
 				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
 			}
 		}
@@ -130,7 +117,7 @@ int main(int argc, char **argv)
 		}
 		while (buf[0] != ' ' && bytes_read != 0 && strcmp(buf, new_line))
 		{
-			if (input_fd = 1)
+			if (input_fd == 1)
 			{
 				bytes_read = system_call(SYS_READ, fp, buf, 1);
 				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
