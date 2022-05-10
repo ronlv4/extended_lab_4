@@ -1,5 +1,4 @@
 #include "util.h"
-
 #include <fcntl.h>
 
 #define STDIN 0
@@ -46,7 +45,7 @@ int main(int argc, char **argv)
 		else if (!strncmp(argv[arg_index], "-i", 2))
 		{
 			input_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_RDONLY, 0777);
-            print_if_debug_mode(debug_mode, SYS_OPEN, argv[arg_index] + 2, input_fd)
+            print_if_debug_mode(debug_mode, SYS_OPEN, argv[arg_index] + 2, input_fd);
 		}
 		else if (!strncmp(argv[arg_index], "-o", 2))
 		{
