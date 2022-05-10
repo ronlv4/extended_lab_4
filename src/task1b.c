@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
             print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[arg_index] + 2, input_fd);
             if (input_fd < 0)
             {
-                system_call(SYS_WRITE, STDERR, "'open' system call returned an error\nexiting...", 48);
+                system_call(SYS_WRITE, STDERR, "'open' system call returned an error\nexiting...\n", 48);
                 system_call(SYS_EXIT, 1);
             }
         } else if (!strncmp(argv[arg_index], "-o", 2)) {
