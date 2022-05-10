@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     }
     int word_count = 0;
     char *new_line = "\n";
-    char *buf[1];
+    char buf[1];
     int bytes_read, return_code;
     bytes_read = system_call(SYS_READ, input_fd, buf, 1);
     print_if_debug_mode_int(debug_mode, SYS_READ, input_fd, bytes_read);
