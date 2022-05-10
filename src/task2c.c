@@ -31,6 +31,7 @@ int system_call();
 
 int main(int argc, char **argv)
 {
+
     int nread, fd, bpos;
     struct linux_dirent *d;
 
