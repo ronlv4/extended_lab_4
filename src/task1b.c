@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
             input_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_RDONLY, 0777);
             print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[arg_index] + 2, input_fd);
         } else if (!strncmp(argv[arg_index], "-o", 2)) {
-            output_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_WRONLY, 0777);
+            output_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_WRONLY | O_CREAT, 0777);
             print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[arg_index] + 2, output_fd);
         }
         arg_index++;
