@@ -7,38 +7,26 @@
 #define STDERR 2
 #define SYS_READ 3
 #define SYS_WRITE 4
+#define SYS_OPEN 5
 
 int system_call();
 
-void print_system_call(int call_id, int arg1, int return_code, int out_name)
+void print_system_call(int call_id, int arg1, int return_code)
 {
-	if (out_name == 0)
-	{
-		system_call(SYS_WRITE, STDOUT, "\nsystem call id: ", strlen("\nfirst argument: "));
-		system_call(SYS_WRITE, STDOUT, itoa(call_id), strlen(itoa(call_id)));
-		system_call(SYS_WRITE, STDOUT, "\nfirst argument: ", strlen("\nfirst argument: "));
-		system_call(SYS_WRITE, STDOUT, itoa(arg1), strlen(itoa(arg1)));
-		system_call(SYS_WRITE, STDOUT, "\nreturn code: ", strlen("\nreturn code: "));
-		system_call(SYS_WRITE, STDOUT, itoa(return_code), strlen(itoa(return_code)));
-		system_call(SYS_WRITE, STDOUT, "\n\n", strlen("\n\n"));
-	}
-	else
-	{
-		system_call(SYS_WRITE, out_name, "\nsystem call id: ", strlen("\nfirst argument: "));
-		system_call(SYS_WRITE, out_name, itoa(call_id), strlen(itoa(call_id)));
-		system_call(SYS_WRITE, out_name, "\nfirst argument: ", strlen("\nfirst argument: "));
-		system_call(SYS_WRITE, out_name, itoa(arg1), strlen(itoa(arg1)));
-		system_call(SYS_WRITE, out_name, "\nreturn code: ", strlen("\nreturn code: "));
-		system_call(SYS_WRITE, out_name, itoa(return_code), strlen(itoa(return_code)));
-		system_call(SYS_WRITE, out_name, "\n\n", strlen("\n\n"));
-	}
+		system_call(SYS_WRITE, STDERR, "\nsystem call id: ", strlen("\nfirst argument: "));
+		system_call(SYS_WRITE, STDERR, itoa(call_id), strlen(itoa(call_id)));
+		system_call(SYS_WRITE, STDERR, "\nfirst argument: ", strlen("\nfirst argument: "));
+		system_call(SYS_WRITE, STDERR, itoa(arg1), strlen(itoa(arg1)));
+		system_call(SYS_WRITE, STDERR, "\nreturn code: ", strlen("\nreturn code: "));
+		system_call(SYS_WRITE, STDERR, itoa(return_code), strlen(itoa(return_code)));
+		system_call(SYS_WRITE, STDERR, "\n\n", strlen("\n\n"));
 }
 
 void print_if_debug_mode(int debug_mode, int call_id, int arg1, int return_code, int out_name)
 {
 	if (debug_mode)
 	{
-		print_system_call(call_id, arg1, return_code, out_name);
+		print_system_call(call_id, arg1, return_code);
 	}
 }
 int main(int argc, char **argv)
@@ -47,11 +35,8 @@ int main(int argc, char **argv)
 	int debug_mode = 0;
 	int output_fd = STDOUT;
 	int input_fd = STDIN;
-	char *input_file;
-	char *output_file;
 	int fp;
 	int fout = 0;
-    input_file = argv[arg_index] + 2;
 	while (arg_index < argc)
 	{
 		if (!strcmp(argv[arg_index], "-D"))
@@ -60,41 +45,35 @@ int main(int argc, char **argv)
 		}
 		else if (!strncmp(argv[arg_index], "-i", 2))
 		{
-            input_fd = 1;
-            input_file = argv[arg_index] + 2;
-			fp = system_call(5, input_file, 0, 0777);
+			input_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_RDONLY, 0777);
+            print_if_debug_mode(debug_mode, SYS_OPEN, argv[arg_index] + 2, input_fd)
 		}
 		else if (!strncmp(argv[arg_index], "-o", 2))
 		{
-            output_fd = 1;
-            output_file = argv[arg_index] + 2;
-			fout = system_call(5, output_file, 1 | 64, 0777);
-			print_if_debug_mode(debug_mode, 5, STDOUT, 1, fout);
+			output_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_WRONLY | O_TEMPORARY, 0777);
+			print_if_debug_mode(debug_mode, SYS_OPEN, output_fd, 1, fout);
 		}
 		arg_index++;
 	}
 	if (input_fd)
 	{
-		print_if_debug_mode(debug_mode, 5, STDOUT, 1, fout);
+		print_if_debug_mode(debug_mode, SYS_OPEN, output_fd, 1, fout);
 	}
-	print_if_debug_mode(debug_mode, SYS_WRITE, STDOUT, 1, fout);
+	print_if_debug_mode(debug_mode, SYS_WRITE, output_fd, 1, fout);
 	int word_count = 0;
 	char *new_line = "\n";
-	int end_space = 0;
 	char *buf[1];
 	int bytes_read = 0;
 	int return_code;
-	int out = 0;
-	int in = 0;
 	if (input_fd == 1)
 	{
 		bytes_read = system_call(SYS_READ, fp, buf, 1);
-		print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+		print_if_debug_mode(debug_mode, SYS_READ, input_fd, bytes_read, fout);
 	}
 	else
 	{
-		bytes_read = system_call(SYS_READ, STDIN, buf, 1);
-		print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+		bytes_read = system_call(SYS_READ, input_fd, buf, 1);
+		print_if_debug_mode(debug_mode, SYS_READ, input_fd, bytes_read, fout);
 	}
 	while (bytes_read != 0)
 	{
@@ -103,12 +82,12 @@ int main(int argc, char **argv)
 			if (input_fd == 1)
 			{
 				bytes_read = system_call(SYS_READ, fp, buf, 1);
-				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+				print_if_debug_mode(debug_mode, SYS_READ, input_fd, bytes_read, fout);
 			}
 			else
 			{
-				bytes_read = system_call(SYS_READ, STDIN, buf, 1);
-				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+				bytes_read = system_call(SYS_READ, input_fd, buf, 1);
+				print_if_debug_mode(debug_mode, SYS_READ, input_fd, bytes_read, fout);
 			}
 		}
 		if (!strcmp(buf, new_line))
@@ -120,22 +99,22 @@ int main(int argc, char **argv)
 			if (input_fd == 1)
 			{
 				bytes_read = system_call(SYS_READ, fp, buf, 1);
-				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+				print_if_debug_mode(debug_mode, SYS_READ, input_fd, bytes_read, fout);
 			}
 			else
 			{
-				bytes_read = system_call(SYS_READ, STDIN, buf, 1);
-				print_if_debug_mode(debug_mode, SYS_READ, STDIN, bytes_read, fout);
+				bytes_read = system_call(SYS_READ, input_fd, buf, 1);
+				print_if_debug_mode(debug_mode, SYS_READ, input_fd, bytes_read, fout);
 			}
 		}
 		word_count++;
 	}
 	if (fout == 0)
 	{
-		return_code = system_call(SYS_WRITE, STDOUT, itoa(word_count), 1);
-		print_if_debug_mode(debug_mode, SYS_WRITE, STDOUT, return_code, fout);
-		return_code = system_call(SYS_WRITE, STDOUT, new_line, strlen(new_line));
-		print_if_debug_mode(debug_mode, SYS_WRITE, STDOUT, return_code, fout);
+		return_code = system_call(SYS_WRITE, output_fd, itoa(word_count), 1);
+		print_if_debug_mode(debug_mode, SYS_WRITE, output_fd, return_code, fout);
+		return_code = system_call(SYS_WRITE, output_fd, new_line, strlen(new_line));
+		print_if_debug_mode(debug_mode, SYS_WRITE, output_fd, return_code, fout);
 	}
 	else
 	{
