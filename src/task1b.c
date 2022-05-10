@@ -4,6 +4,7 @@
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
+#define SYS_EXIT 1
 #define SYS_READ 3
 #define SYS_WRITE 4
 #define SYS_OPEN 5
@@ -57,7 +58,9 @@ void print_if_debug_mode_char(int debug_mode, int call_id, char *arg1, int retur
 
 int main(int argc, char **argv) {
     int arg_index = 1;
-    int debug_mode = 0;
+    int debug_mode = 1;
+    print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[1] + 2, 0);
+    system_call(SYS_EXIT, 0);
     int output_fd = STDOUT;
     int input_fd = STDIN;
     while (arg_index < argc) {
