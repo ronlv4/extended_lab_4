@@ -58,15 +58,17 @@ void print_if_debug_mode_char(int debug_mode, int call_id, char *arg1, int retur
 
 int main(int argc, char **argv) {
     int arg_index = 1;
-    int debug_mode = 1;
-    print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[1] + 2, 0);
-    system_call(SYS_EXIT, 0);
+    int debug_mode = 0;
     int output_fd = STDOUT;
     int input_fd = STDIN;
     while (arg_index < argc) {
-        if (!strcmp(argv[arg_index], "-D")) {
+        if (!strcmp(argv[arg_index], "-D"))
             debug_mode = 1;
-        } else if (!strncmp(argv[arg_index], "-i", 2)) {
+        arg_index++;
+    }
+    arg_index = 1;
+    while (arg_index < argc) {
+        if (!strncmp(argv[arg_index], "-i", 2)) {
             input_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_RDONLY, 0777);
             print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[arg_index] + 2, input_fd);
         } else if (!strncmp(argv[arg_index], "-o", 2)) {
