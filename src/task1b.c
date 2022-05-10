@@ -96,4 +96,5 @@ int main(int argc, char **argv) {
     print_if_debug_mode_int(debug_mode, SYS_WRITE, output_fd, return_code);
     return_code = system_call(SYS_WRITE, output_fd, new_line, strlen(new_line));
     print_if_debug_mode_int(debug_mode, SYS_WRITE, output_fd, return_code);
+    return 0;
 }
