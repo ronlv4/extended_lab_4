@@ -26,7 +26,7 @@ _start:
     mov     eax,1
     int     0x80
     nop
-        
+
 system_call:
     push    ebp             ; Save caller state
     mov     ebp, esp
