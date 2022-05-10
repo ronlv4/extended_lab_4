@@ -1,7 +1,8 @@
 section .text
 global code_start
 global infection
-extern main
+extern system_call
+
 code_start:
     ifection:
         push ebp
