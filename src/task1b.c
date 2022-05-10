@@ -71,6 +71,11 @@ int main(int argc, char **argv) {
         if (!strncmp(argv[arg_index], "-i", 2)) {
             input_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_RDONLY, 0777);
             print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[arg_index] + 2, input_fd);
+            if (input_fd == -1)
+            {
+                system_call(SYS_WRITE, STDERR, "'open' system call returned an error\nexiting...", 48);
+                system_call(SYS_EXIT, 1);
+            }
         } else if (!strncmp(argv[arg_index], "-o", 2)) {
             output_fd = system_call(SYS_OPEN, argv[arg_index] + 2, O_WRONLY | O_CREAT, 0777);
             print_if_debug_mode_char(debug_mode, SYS_OPEN, argv[arg_index] + 2, output_fd);
